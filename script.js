@@ -1,42 +1,96 @@
 document.addEventListener('DOMContentLoaded', function () {
-  var todoItems = [];
+const txtTitle = document.getElementById('txtTitle');
+const txtDetails = document.getElementById('txtDetails');
+const btnAdd = document.getElementById('btnAdd');
+const btnClear = document.getElementById('btnClear');
+const btnFIFO = document.getElementById('btnFIFO');
+const btnFILO = document.getElementById('btnFILO');
+const btnReset = document.getElementById('btnReset');
+const todoContainer = document.getElementById('todoContainer');
+const doneContainer = document.getElementById('doneContainer');
 
-  function addTodoItem(title, details) {
-    var todoItem = document.createElement('div');
-    todoItem.classList.add('col');
-    todoItem.innerHTML = '<div class="card"><div class="card-body"><h5 class="card-title">' + title + '</h5><p class="card-text">' + details + '</p></div></div>';
+btnAdd.addEventListener('click', addTask);
+btnClear.addEventListener('click', clearForm);
+btnFIFO.addEventListener('click', processTasksFIFO);
+btnFILO.addEventListener('click', processTasksFILO);
+btnReset.addEventListener('click', resetLists);
 
-    todoItems.push(todoItem);
+function addTask() {
+const title = txtTitle.value.trim();
+const details = txtDetails.value.trim();
 
-    document.getElementById('todoContainer').appendChild(todoItem);
-  }
+if (title === '' || details === '') {
+alert('Please enter both title and details.');
+return;
+}
 
-  document.getElementById('btnAdd').addEventListener('click', function () {
-    var title = document.getElementById('txtTitle').value;
-    var details = document.getElementById('txtDetails').value;
+const taskItem = createTaskItem(title, details);
+todoContainer.appendChild(taskItem);
 
-    addTodoItem(title, details);
+clearForm();
+}
 
-    document.getElementById('txtTitle').value = '';
-    document.getElementById('txtDetails').value = '';
-  });
+function createTaskItem(title, details) {
+const card = document.createElement('div');
+card.classList.add('col-md-4');
 
-  document.getElementById('btnFIFO').addEventListener('click', function () {
-    if (todoItems.length > 0) {
-      document.getElementById('doneContainer').appendChild(todoItems.shift());
-    }
-  });
+const taskCard = document.createElement('div');
+taskCard.classList.add('card', 'mb-3');
 
-  document.getElementById('btnFILO').addEventListener('click', function () {
-    if (todoItems.length > 0) {
-      document.getElementById('doneContainer').appendChild(todoItems.pop());
-    }
-  });
+const cardBody = document.createElement('div');
+cardBody.classList.add('card-body');
 
-  document.getElementById('btnReset').addEventListener('click', function () {
-    document.getElementById('todoContainer').innerHTML = '';
-    document.getElementById('doneContainer').innerHTML = '';
+const cardTitle = document.createElement('h5');
+cardTitle.classList.add('card-title');
+cardTitle.innerText = title;
 
-    todoItems = [];
-  });
+const cardText = document.createElement('p');
+cardText.classList.add('card-text');
+cardText.innerText = details;
+
+cardBody.appendChild(cardTitle);
+cardBody.appendChild(cardText);
+taskCard.appendChild(cardBody);
+card.appendChild(taskCard);
+
+return card;
+}
+
+function clearForm() {
+txtTitle.value = '';
+txtDetails.value = '';
+}
+
+function processTasksFIFO() {
+moveTasks(todoContainer, doneContainer, 'FIFO');
+}
+
+function processTasksFILO() {
+moveTasks(todoContainer, doneContainer, 'FILO');
+}
+
+function moveTasks(source, destination, approach) {
+const tasks = source.getElementsByClassName('col-md-4');
+
+if (approach === 'FIFO') {
+while (tasks.length > 0) {
+destination.appendChild(tasks[0]);
+}
+} else if (approach === 'FILO') {
+for (let i = tasks.length - 1; i >= 0; i--) {
+destination.appendChild(tasks[i]);
+}
+}
+}
+
+function resetLists() {
+clearChildren(todoContainer);
+clearChildren(doneContainer);
+}
+
+function clearChildren(element) {
+while (element.firstChild) {
+element.removeChild(element.firstChild);
+}
+}
 });
